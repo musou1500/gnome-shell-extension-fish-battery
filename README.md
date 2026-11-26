@@ -2,9 +2,7 @@
 
 [おさかなキーボード（Fish Keyboard）](https://github.com/TakumaOnishi/Fish_Keyboard)の左右の充電残量を GNOME Shell のトップバーに表示する拡張機能です。
 
-```
-🐟 L 30% R 71%
-```
+![Fish Keyboard Battery](screenshot.png)
 
 GNOME の標準の電池表示では、左手側（親機）の残量しか見えません。この拡張は、左手側が中継している右手側の残量も BlueZ から直接読み取って表示します。
 
