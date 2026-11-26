@@ -11,7 +11,6 @@ GNOME の標準の電池表示では、左手側（親機）の残量しか見�
 ## 必要なもの
 
 - GNOME Shell 50
-- Python 3 と PyGObject（`python3-gi`）
 - 右手側の残量を中継するファームウェア。ZMK の設定（`.conf`）に次の 2 行が必要です。
 
   ```
@@ -39,13 +38,8 @@ gnome-extensions enable fish-battery@musou1500.github.io
 
 - 残量は 5 分ごとに更新されます。表示をクリックするとすぐに更新します。
 - キーボードがつながっていないときは `-` と表示されます。
-- `fish-battery.py` を単体で実行すると、端末で残量を確認できます。
 
-  ```sh
-  ./fish-battery.py
-  ```
-
-キーボードは Bluetooth のデバイス名 `Fish Keyboard` で探します。ファームウェアでキーボード名（`CONFIG_ZMK_KEYBOARD_NAME`）を変えている場合は、`fish-battery.py` の `DEVICE_NAME` を書き換えてください。
+キーボードは Bluetooth のデバイス名 `Fish Keyboard` で探します。ファームウェアでキーボード名（`CONFIG_ZMK_KEYBOARD_NAME`）を変えている場合は、`battery.js` の `DEVICE_NAME` を書き換えてください。
 
 ## ライセンス
 
