@@ -15,6 +15,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The version shown to users comes from the tag (v2 -> "2"), so metadata.json is never edited by hand.
+      - name: Set version name
+        run: |
+          jq --arg v "${GITHUB_REF_NAME#v}" '. + {"version-name": $v}' metadata.json > metadata.tmp
+          mv metadata.tmp metadata.json
+
       - name: Build zip
         run: zip fish-battery@musou1500.github.io.shell-extension.zip metadata.json *.js *.svg
 
