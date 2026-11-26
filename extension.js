@@ -13,6 +13,8 @@ const UPDATE_INTERVAL_SECONDS = 300;
 export default class FishBatteryExtension extends Extension {
     enable() {
         this._cancellable = new Gio.Cancellable();
+        // An update from before the last disable() may still be finishing its cancellation.
+        this._updating = false;
         this._button = new PanelMenu.Button(0.0, this.metadata.name, true);
         const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
         const iconFile = this.dir.get_child('fish-symbolic.svg');
@@ -48,6 +50,10 @@ export default class FishBatteryExtension extends Extension {
     }
 
     async _update() {
+        // Skip while an update is running so an older result cannot overwrite a newer one.
+        if (this._updating)
+            return;
+        this._updating = true;
         let text;
         try {
             // null when the keyboard is not connected.
@@ -56,6 +62,8 @@ export default class FishBatteryExtension extends Extension {
             if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
             text = '-';
+        } finally {
+            this._updating = false;
         }
         if (this._label)
             this._label.text = text;

@@ -45,6 +45,21 @@ export async function readBatteryText(cancellable = null) {
 
     // Right half: the extra Battery Level characteristic labelled "Peripheral 0".
     // It reads 0 when the right half is not connected.
+    // A failed read only hides the right level, so the left level still shows.
+    let right;
+    try {
+        right = await readRightLevel(objects, devicePath, cancellable);
+    } catch (e) {
+        if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+            throw e;
+    }
+
+    const leftText = left !== undefined ? `${left}%` : '?';
+    const rightText = right ? `${right}%` : '?';
+    return `L ${leftText} R ${rightText}`;
+}
+
+async function readRightLevel(objects, devicePath, cancellable) {
     let right;
     for (const path of Object.keys(objects).sort()) {
         const characteristic = objects[path]['org.bluez.GattCharacteristic1'];
@@ -60,8 +75,5 @@ export async function readBatteryText(cancellable = null) {
         if (label.startsWith('Peripheral'))
             right = (await readValue(path, 'org.bluez.GattCharacteristic1', cancellable))[0];
     }
-
-    const leftText = left !== undefined ? `${left}%` : '?';
-    const rightText = right ? `${right}%` : '?';
-    return `L ${leftText} R ${rightText}`;
+    return right;
 }
