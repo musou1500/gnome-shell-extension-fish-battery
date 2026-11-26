@@ -9,6 +9,8 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import {readBatteryText} from './battery.js';
 
 const UPDATE_INTERVAL_SECONDS = 300;
+// Reading usually takes well under a second, so keep the swimming fish visible at least this long.
+const MIN_UPDATING_MS = 1200;
 
 // The fish changes with the state: normal, updating (blowing bubbles) or disconnected.
 const ICON_FILES = {
@@ -48,6 +50,10 @@ export default class FishBatteryExtension extends Extension {
         this._cancellable = null;
         GLib.Source.remove(this._timerId);
         this._timerId = null;
+        if (this._minUpdatingTimerId) {
+            GLib.Source.remove(this._minUpdatingTimerId);
+            this._minUpdatingTimerId = null;
+        }
         this._button.destroy();
         this._button = null;
         this._icon = null;
@@ -60,14 +66,26 @@ export default class FishBatteryExtension extends Extension {
             return;
         this._updating = true;
         this._setIcon('updating');
+        // Clicks are ignored until this ends too, since the update still shows as running.
+        const minUpdatingTime = new Promise(resolve => {
+            this._minUpdatingTimerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, MIN_UPDATING_MS, () => {
+                this._minUpdatingTimerId = null;
+                resolve();
+                return GLib.SOURCE_REMOVE;
+            });
+        });
         let text;
         try {
-            // null when the keyboard is not connected.
-            text = await readBatteryText(this._cancellable);
-        } catch (e) {
-            if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-                return;
-            text = null;
+            try {
+                // null when the keyboard is not connected.
+                text = await readBatteryText(this._cancellable);
+            } catch (e) {
+                if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                    return;
+                text = null;
+            }
+            // Never resolves when disable() removes the timer, so nothing below runs after that.
+            await minUpdatingTime;
         } finally {
             this._updating = false;
         }
