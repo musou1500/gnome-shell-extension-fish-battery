@@ -1,0 +1,7 @@
+{
+  "uuid": "fish-battery@musou1500.github.io",
+  "name": "Fish Keyboard Battery",
+  "description": "Show Fish Keyboard left/right battery levels in the top bar.",
+  "shell-version": ["50"],
+  "url": "https://github.com/musou1500/gnome-shell-extension-fish-battery"
+}
