@@ -15,9 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # Same files as `gnome-extensions pack --extra-source=battery.js --extra-source=fish-symbolic.svg`.
       - name: Build zip
-        run: zip fish-battery@musou1500.github.io.shell-extension.zip metadata.json extension.js battery.js fish-symbolic.svg
+        run: zip fish-battery@musou1500.github.io.shell-extension.zip metadata.json *.js *.svg
 
       - name: Create release
         env:

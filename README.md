@@ -37,7 +37,8 @@ gnome-extensions enable fish-battery@musou1500.github.io
 ## 使い方
 
 - 残量は 5 分ごとに更新されます。表示をクリックするとすぐに更新します。
-- キーボードがつながっていないときは `-` と表示されます。
+- キーボードがつながっていないときは `-` と表示され、おさかなが輪郭だけになります。
+- 更新中は、おさかなが泡を吐きながら上下に泳ぎます。
 
 キーボードは Bluetooth のデバイス名 `Fish Keyboard` で探します。ファームウェアでキーボード名（`CONFIG_ZMK_KEYBOARD_NAME`）を変えている場合は、`battery.js` の `DEVICE_NAME` を書き換えてください。
 

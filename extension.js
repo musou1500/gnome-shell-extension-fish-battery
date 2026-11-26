@@ -10,6 +10,13 @@ import {readBatteryText} from './battery.js';
 
 const UPDATE_INTERVAL_SECONDS = 300;
 
+// The fish changes with the state: normal, updating (blowing bubbles) or disconnected.
+const ICON_FILES = {
+    normal: 'fish-symbolic.svg',
+    updating: 'fish-updating-symbolic.svg',
+    disconnected: 'fish-disconnected-symbolic.svg',
+};
+
 export default class FishBatteryExtension extends Extension {
     enable() {
         this._cancellable = new Gio.Cancellable();
@@ -17,11 +24,8 @@ export default class FishBatteryExtension extends Extension {
         this._updating = false;
         this._button = new PanelMenu.Button(0.0, this.metadata.name, true);
         const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
-        const iconFile = this.dir.get_child('fish-symbolic.svg');
-        box.add_child(new St.Icon({
-            gicon: new Gio.FileIcon({file: iconFile}),
-            style_class: 'system-status-icon',
-        }));
+        this._icon = new St.Icon({style_class: 'system-status-icon'});
+        box.add_child(this._icon);
         this._label = new St.Label({text: '…', y_align: Clutter.ActorAlign.CENTER});
         box.add_child(this._label);
         this._button.add_child(box);
@@ -46,6 +50,7 @@ export default class FishBatteryExtension extends Extension {
         this._timerId = null;
         this._button.destroy();
         this._button = null;
+        this._icon = null;
         this._label = null;
     }
 
@@ -54,18 +59,39 @@ export default class FishBatteryExtension extends Extension {
         if (this._updating)
             return;
         this._updating = true;
+        this._setIcon('updating');
         let text;
         try {
             // null when the keyboard is not connected.
-            text = await readBatteryText(this._cancellable) ?? '-';
+            text = await readBatteryText(this._cancellable);
         } catch (e) {
             if (e.matches?.(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
-            text = '-';
+            text = null;
         } finally {
             this._updating = false;
         }
-        if (this._label)
-            this._label.text = text;
+        if (!this._label)
+            return;
+        this._label.text = text ?? '-';
+        this._setIcon(text ? 'normal' : 'disconnected');
+    }
+
+    _setIcon(state) {
+        const file = this.dir.get_child(ICON_FILES[state]);
+        this._icon.gicon = new Gio.FileIcon({file});
+
+        // While updating, the fish bobs up and down as if swimming.
+        this._icon.remove_all_transitions();
+        this._icon.translation_y = 0;
+        if (state === 'updating') {
+            this._icon.ease({
+                translation_y: -2,
+                duration: 300,
+                mode: Clutter.AnimationMode.EASE_IN_OUT_QUAD,
+                repeatCount: -1,
+                autoReverse: true,
+            });
+        }
     }
 }
