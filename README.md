@@ -22,10 +22,10 @@ GNOME の標準の電池表示では、左手側（親機）の残量しか見�
 
 ## インストール
 
+[Releases](https://github.com/musou1500/gnome-shell-extension-fish-battery/releases) から `fish-battery@musou1500.github.io.shell-extension.zip` をダウンロードして、インストールします。
+
 ```sh
-git clone https://github.com/musou1500/gnome-shell-extension-fish-battery.git
-ln -s "$PWD/gnome-shell-extension-fish-battery" \
-  ~/.local/share/gnome-shell/extensions/fish-battery@musou1500.github.io
+gnome-extensions install fish-battery@musou1500.github.io.shell-extension.zip
 ```
 
 ログアウトしてログインし直したあと、拡張機能を有効にします。
@@ -40,6 +40,15 @@ gnome-extensions enable fish-battery@musou1500.github.io
 - キーボードがつながっていないときは `-` と表示されます。
 
 キーボードは Bluetooth のデバイス名 `Fish Keyboard` で探します。ファームウェアでキーボード名（`CONFIG_ZMK_KEYBOARD_NAME`）を変えている場合は、`battery.js` の `DEVICE_NAME` を書き換えてください。
+
+## リリースの作り方
+
+`v` で始まるタグを push すると、GitHub Actions が zip を作ってリリースを公開します。
+
+```sh
+git tag v1
+git push origin v1
+```
 
 ## ライセンス
 
